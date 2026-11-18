@@ -30,11 +30,15 @@ Plus two upstream skill sets installed at install-time via the `skills` ecosyste
 ## Quick start (new computer)
 
 ```bash
-git clone https://github.com/<you>/my-skills.git
+# macOS / Linux / Git Bash / WSL
+git clone https://github.com/sheikhsaidulislamxyz-svg/my-skills.git
 cd my-skills
-# macOS / Linux / Git Bash
+chmod +x install.sh   # only if your checkout lost the exec bit
 ./install.sh
+
 # Windows PowerShell
+git clone https://github.com/sheikhsaidulislamxyz-svg/my-skills.git
+cd my-skills
 powershell -ExecutionPolicy Bypass -File .\install.ps1
 ```
 
