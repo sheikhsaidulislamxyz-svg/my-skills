@@ -1,0 +1,26 @@
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*~
+.vscode/
+.idea/
+
+# Local test artifacts
+.my-skills-last-install
+backups/
+
+# Node
+node_modules/
+npm-debug.log*
+
+# Python (skill scripts)
+__pycache__/
+*.pyc
+.venv/
+
+# Build output (Flutter projects using this template)
+.dart_tool/
+build/
+.flutter-plugins*

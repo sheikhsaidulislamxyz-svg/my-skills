@@ -1,0 +1,54 @@
+{
+  "comment": "MCP servers installed by my-skills. install.sh / install.ps1 read this file and run `claude mcp add --scope user <name> <command> -- <args>` for each entry. `requires` declares an external runtime prerequisite; entries whose requirement is not met are skipped with a clear notice (not silently).",
+  "servers": [
+    {
+      "name": "playwright",
+      "description": "Browser automation + end-to-end testing (official Microsoft Playwright MCP server).",
+      "source": "https://github.com/microsoft/playwright-mcp",
+      "package": "@playwright/mcp",
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp@latest"],
+      "scope": "user",
+      "requires": { "npx": "any" }
+    },
+    {
+      "name": "context7",
+      "description": "Up-to-date, version-specific documentation for any library/framework (Upstash Context7).",
+      "source": "https://github.com/upstash/context7",
+      "package": "@upstash/context7-mcp",
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp@latest"],
+      "scope": "user",
+      "requires": { "npx": "any" }
+    },
+    {
+      "name": "sequential-thinking",
+      "description": "Structured step-by-step reasoning tool (MCP reference server).",
+      "source": "https://github.com/modelcontextprotocol/servers/tree/main/src/sequentialthinking",
+      "package": "@modelcontextprotocol/server-sequential-thinking",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking@latest"],
+      "scope": "user",
+      "requires": { "npx": "any" }
+    },
+    {
+      "name": "firebase",
+      "description": "Work with Firebase projects from the agent: Firestore/Storage rules, Auth, FCM, Crashlytics, Remote Config, App Hosting, SQL Connect, Functions logs.",
+      "source": "https://github.com/firebase/firebase-tools/tree/master/src/mcp",
+      "package": "firebase-tools",
+      "command": "npx",
+      "args": ["-y", "firebase-tools@latest", "mcp"],
+      "scope": "user",
+      "requires": { "npx": "any", "node": ">=18" }
+    },
+    {
+      "name": "dart",
+      "description": "Official Dart & Flutter MCP server: analyzer diagnostics, symbol resolution, test runner, runtime inspection (built into the Dart SDK, run as `dart mcp-server`).",
+      "source": "https://github.com/dart-lang/ai/tree/main/pkgs/dart_mcp_server",
+      "command": "dart",
+      "args": ["mcp-server"],
+      "scope": "user",
+      "requires": { "dart": ">=3.9" }
+    }
+  ]
+}
