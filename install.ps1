@@ -96,19 +96,26 @@ if (Test-Path -LiteralPath $TargetClaude) {
   Ok "created $TargetClaude"
 }
 
-# --- 4. remote skills via npx (license unclear upstream — not copied) ----------
+# --- 4. remote skills via npx (no license file upstream — not copied) ----------
+# A failure in one remote skill does NOT abort the others: it is recorded and
+# reported at the end of the run (script exits 1 in that case).
 Note "remote skills (npx skills add)"
 $RemoteSkills = @('anthropics/skills', 'vercel-labs/agent-skills')
+$RemoteFailed = @()
 if ($SkipRemote) {
   Warn "skipped remote installs. Would run:"
-  foreach ($pkg in $RemoteSkills) { Write-Host "      npx --yes skills add $pkg -g -a claude -s '*' -y" }
+  foreach ($pkg in $RemoteSkills) { Write-Host "      npx --yes skills add $pkg -g -a claude-code -s '*' -y" }
 } else {
   if (-not (Get-Command npx -ErrorAction SilentlyContinue)) { Die "npx not found on PATH. Install Node.js 18+ and re-run, or use -SkipRemote." }
   foreach ($pkg in $RemoteSkills) {
-    Write-Host "      npx --yes skills add $pkg -g -a claude -s '*' -y"
-    & npx --yes skills add $pkg -g -a claude -s '*' -y
-    if ($LASTEXITCODE -ne 0) { Die "remote install failed for $pkg. Re-run with -SkipRemote to install only local skills." }
-    Ok "installed remote skills from $pkg"
+    Write-Host "      npx --yes skills add $pkg -g -a claude-code -s '*' -y"
+    & npx --yes skills add $pkg -g -a claude-code -s '*' -y
+    if ($LASTEXITCODE -ne 0) {
+      Warn "remote install failed for '$pkg' - continuing with the rest"
+      $RemoteFailed += $pkg
+    } else {
+      Ok "installed remote skills from $pkg"
+    }
   }
 }
 
@@ -186,5 +193,18 @@ Write-Host "  Superpowers:  /plugin marketplace add obra/superpowers-marketplace
 Write-Host "                /plugin install superpowers@superpowers-marketplace"
 Write-Host "  Flutter/Dart: /plugin marketplace add flutter/agent-plugins"
 Write-Host "                /plugin install dart-flutter@dart-flutter"
-if ($TestMode) { Write-Host "TEST MODE: no network calls were made and nothing outside $ClaudeHome was written." }
+if ($TestMode) {
+  Write-Host "TEST MODE: no network calls were made and nothing outside $ClaudeHome was written."
+} elseif ($RemoteFailed.Count -gt 0) {
+  Write-Host ""
+  Warn "FAILED remote installs ($($RemoteFailed.Count)):"
+  foreach ($pkg in $RemoteFailed) {
+    Write-Host "      $pkg"
+    Write-Host "      retry: npx --yes skills add $pkg -g -a claude-code -s '*' -y"
+  }
+  Ok "local setup is complete - only the remote installs above failed"
+  exit 1
+} else {
+  Ok "remote installs: all succeeded"
+}
 Ok "done"

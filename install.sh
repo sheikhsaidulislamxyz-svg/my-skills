@@ -152,23 +152,29 @@ fi
 rm -f "$BLOCK_TMP"
 
 # --- 4. remote skills via npx (no license file upstream — never copied) ---------
+# A failure in one remote skill does NOT abort the others: it is recorded and
+# reported at the end of the run (script exits 1 in that case).
 note "remote skills (npx skills add)"
 REMOTE_SKILLS=(
   'anthropics/skills'        # official Anthropic — no LICENSE file in repo
   'vercel-labs/agent-skills' # official Vercel — no LICENSE file in repo
 )
+REMOTE_FAILED=()
 if [ "$SKIP_REMOTE" = "1" ]; then
   warn "skipped remote installs. Would run:"
   for pkg in "${REMOTE_SKILLS[@]}"; do
-    echo "      npx --yes skills add $pkg -g -a claude -s '*' -y"
+    echo "      npx --yes skills add $pkg -g -a claude-code -s '*' -y"
   done
 else
   command -v npx >/dev/null 2>&1 || die "npx not found on PATH. Install Node.js 18+ and re-run, or use --skip-remote."
   for pkg in "${REMOTE_SKILLS[@]}"; do
-    echo "      npx --yes skills add $pkg -g -a claude -s '*' -y"
-    npx --yes skills add "$pkg" -g -a claude -s '*' -y \
-      || die "remote install failed for '$pkg'. Re-run with --skip-remote to keep local skills only."
-    ok "installed remote skills from $pkg"
+    echo "      npx --yes skills add $pkg -g -a claude-code -s '*' -y"
+    if npx --yes skills add "$pkg" -g -a claude-code -s '*' -y; then
+      ok "installed remote skills from $pkg"
+    else
+      warn "remote install failed for '$pkg' — continuing with the rest"
+      REMOTE_FAILED+=("$pkg")
+    fi
   done
 fi
 check_servers_json_sync
@@ -248,5 +254,18 @@ echo "  Superpowers:  /plugin marketplace add obra/superpowers-marketplace"
 echo "                /plugin install superpowers@superpowers-marketplace"
 echo "  Flutter/Dart: /plugin marketplace add flutter/agent-plugins"
 echo "                /plugin install dart-flutter@dart-flutter"
-[ "$TEST_MODE" = "1" ] && echo "TEST MODE: no network calls were made and nothing outside $CLAUDE_HOME was written."
+if [ "$TEST_MODE" = "1" ]; then
+  echo "TEST MODE: no network calls were made and nothing outside $CLAUDE_HOME was written."
+elif [ "${#REMOTE_FAILED[@]}" -gt 0 ]; then
+  echo
+  warn "FAILED remote installs (${#REMOTE_FAILED[@]}):"
+  for pkg in "${REMOTE_FAILED[@]}"; do
+    echo "      $pkg"
+    echo "      retry: npx --yes skills add $pkg -g -a claude-code -s '*' -y"
+  done
+  ok "local setup is complete — only the remote installs above failed"
+  exit 1
+else
+  ok "remote installs: all succeeded"
+fi
 ok "done"

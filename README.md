@@ -29,18 +29,26 @@ Plus two upstream skill sets installed at install-time via the `skills` ecosyste
 
 ## Quick start (new computer)
 
+**The two code blocks below are platform-specific. Use only the one that matches your OS — do NOT paste both into the same terminal.**
+
+**macOS / Linux / Git Bash / WSL** (bash/zsh) — paste this whole block:
+
 ```bash
-# macOS / Linux / Git Bash / WSL
 git clone https://github.com/sheikhsaidulislamxyz-svg/my-skills.git
 cd my-skills
 chmod +x install.sh   # only if your checkout lost the exec bit
 ./install.sh
+```
 
-# Windows PowerShell
+**Windows PowerShell** only (`powershell` or `pwsh`) — paste this whole block:
+
+```powershell
 git clone https://github.com/sheikhsaidulislamxyz-svg/my-skills.git
 cd my-skills
 powershell -ExecutionPolicy Bypass -File .\install.ps1
 ```
+
+Mixing the two (e.g. `./install.sh` in cmd.exe/PowerShell, or the PowerShell line in a bash terminal) will fail — on Windows, bash-style `./install.sh` needs Git Bash/WSL, and `.\install.ps1` needs PowerShell. If in doubt on Windows: open **Git Bash** and use the first block, or open **PowerShell** and use the second.
 
 The installer:
 
@@ -48,10 +56,10 @@ The installer:
 2. **Backs up** anything already present with the same name into `~/.claude/backups/my-skills-<timestamp>/` — never silently overwrites
 3. **Merges** `templates/CLAUDE.md` into `~/.claude/CLAUDE.md` inside a clearly-marked block (`<!-- >>> my-skills managed block (Flutter/Firebase) >>> -->` … `<!-- <<< my-skills managed block <<< -->`). Your existing file is preserved; re-running the installer only refreshes the managed block. Nothing is overwritten.
 4. Installs the MCP servers from `mcp/servers.json` with `claude mcp add --scope user …` (dart MCP skipped automatically if Dart < 3.9)
-5. Runs `npx --yes skills add anthropics/skills -g -a claude -s '*' -y` and the same for `vercel-labs/agent-skills`
+5. Runs `npx --yes skills add anthropics/skills -g -a claude-code -s '*' -y` and the same for `vercel-labs/agent-skills` (the `skills` CLI valid agent id is `claude-code`, not `claude`)
 6. Finishes with `claude mcp list` so you see the result
 
-Any step that fails **stops the install with the error printed** — nothing fails silently. Useful flags: `--skip-remote` (skip npx/claude steps), `MY_SKILLS_TEST=1` + `CLAUDE_HOME=<tmpdir>` for a hermetic dry run.
+A failed **remote skill install** (step 5) does **not** abort the rest: every remote skill is attempted, and at the end of the run the installer prints which ones failed (with exact retry commands) and exits non-zero so CI/scripts can detect it. All other failures **stop the install with the error printed** — nothing fails silently. Useful flags: `--skip-remote` (skip npx/claude steps), `MY_SKILLS_TEST=1` + `CLAUDE_HOME=<tmpdir>` for a hermetic dry run.
 
 ### After installing: two plugins are manual on purpose
 
@@ -120,6 +128,8 @@ my-skills/
 
 ## Verification
 
+bash — on Windows run this in **Git Bash**, not cmd/PowerShell:
+
 ```bash
 # 1. Dry-run installer in a throwaway config dir (no network, no real config touched)
 MY_SKILLS_TEST=1 CLAUDE_HOME=$(mktemp -d)/.claude ./install.sh
@@ -144,7 +154,7 @@ EOF
 
 - **`claude` not on PATH** — the installer prints the exact `claude mcp add --scope user …` commands to run manually; the rest of the setup still completes.
 - **Dart < 3.9 or not installed** — the `dart` MCP server is skipped with a warning; install Dart ≥ 3.9 and re-run `./install.sh` to add it (`dart mcp-server` ships in the SDK).
-- **`npx skills add` failed** — re-run with `./install.sh --skip-remote`, then run the two `npx` commands manually with network access.
+- **`npx skills add` failed** — you'll see a `FAILED remote installs` list at the end with exact retry commands. Run `./install.sh --skip-remote` while iterating, then the two `npx` commands (with `-a claude-code`) manually once you have network access.
 - **Conflict with an existing `~/.claude/skills/<name>`** — the installer moves it to `~/.claude/backups/my-skills-<timestamp>/` first; nothing is lost.
 - **MCP server already exists** — `claude mcp remove <name>` then re-run, or keep your existing server.
 

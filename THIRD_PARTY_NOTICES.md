@@ -44,7 +44,7 @@ my-skills redistributes the following third-party skill content verbatim (no fil
 
 ## Installed via `npx skills add` at install time (NOT redistributed by this repo)
 
-Upstream repositories carry no license file, or an unverifiable one, so we do not copy their code. The installer runs `npx --yes skills add <repo> -g -a claude -s '*' -y`:
+Upstream repositories carry no license file, or an unverifiable one, so we do not copy their code. The installer runs `npx --yes skills add <repo> -g -a claude-code -s '*' -y`:
 
 - https://github.com/anthropics/skills — "Public repository for Agent Skills" (Anthropic). No LICENSE file in repo; delegating to the ecosystem installer.
 - https://github.com/vercel-labs/agent-skills — "Vercel's official collection of agent skills" (MIT is shown in the repository sidebar but no LICENSE file is present); delegating to the ecosystem installer.
